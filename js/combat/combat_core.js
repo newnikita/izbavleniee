@@ -8,10 +8,11 @@ window.logBattle = function(text, color = '#b0b0b0') {
     if (!log) return;
     const entry = document.createElement('div');
     entry.style.color = color;
-    entry.style.marginBottom = '6px';
+    entry.style.padding = '8px 0';
+    entry.style.borderBottom = '1px dashed rgba(63, 59, 99, 0.4)';
+    entry.style.lineHeight = '1.4';
     entry.innerHTML = text;
-    log.appendChild(entry);
-    log.scrollTop = log.scrollHeight;
+    log.prepend(entry);
 };
 
 function stopCombatIntervals() {
@@ -206,13 +207,14 @@ function startBattle(enemyType) {
         let logElement = document.getElementById('battle-log');
         if(logElement) {
             let logMsg = '';
+            let st = 'padding: 8px 0; border-bottom: 1px dashed rgba(63, 59, 99, 0.4); line-height: 1.4;';
             if (battleState.playerExhausted) {
-                logMsg += '<div style="color: #cc00cc; font-weight:bold; margin-bottom: 8px;">⚠️ Враг наложил ИСТОЩЕНИЕ! Приток маны замедлен.</div>';
+                logMsg += '<div style="color: #cc00cc; font-weight:bold; ' + st + '">⚠️ Враг наложил ИСТОЩЕНИЕ! Приток маны замедлен.</div>';
             }
-            if (enemyType === 'arena') logMsg += '<div style="color: #00ffcc; font-weight:bold; margin-bottom: 8px;">⚔️ БОЙ НА АРЕНЕ! Противник иллюзорен, но его мощь реальна.</div>';
-            else if (enemyType === 'road') logMsg += '<div style="color: #d4af37; font-weight:bold; margin-bottom: 8px;">⚔️ БОЙ НА ДОРОГЕ! Впереди неизведанная угроза.</div>';
-            else if (enemyType === 'girl') logMsg += '<div style="color: #ff0000; font-weight:bold; margin-bottom: 8px;">🔥 АУРА СЖИГАНИЯ МАНЫ! Ваш магический резерв постоянно тает!</div>';
-            else logMsg += '<div style="color: #e0f7fa; margin-bottom: 8px;">⚔️ Бой начался! Мана накапливается.</div>';
+            if (enemyType === 'arena') logMsg += '<div style="color: #00ffcc; font-weight:bold; ' + st + '">⚔️ БОЙ НА АРЕНЕ! Противник иллюзорен, но его мощь реальна.</div>';
+            else if (enemyType === 'road') logMsg += '<div style="color: #d4af37; font-weight:bold; ' + st + '">⚔️ БОЙ НА ДОРОГЕ! Впереди неизведанная угроза.</div>';
+            else if (enemyType === 'girl') logMsg += '<div style="color: #ff0000; font-weight:bold; ' + st + '">🔥 АУРА СЖИГАНИЯ МАНЫ! Ваш магический резерв постоянно тает!</div>';
+            else logMsg += '<div style="color: #e0f7fa; ' + st + '">⚔️ Бой начался! Мана накапливается.</div>';
             logElement.innerHTML = logMsg;
         }
         
