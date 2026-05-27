@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История избавления</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* === ИСПРАВЛЕНИЕ ГЛАВНОГО МЕНЮ === */
+        #menu-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #050505; /* Мрачный темный фон */
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #menu-container h1 {
+            font-family: 'Georgia', serif;
+            font-size: 4rem;
+            color: #8b0000;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(180deg, #3a0000, #110000);
+            border: 2px solid #8b0000;
+            color: #d4af37;
+            font-size: 1.5rem;
+            padding: 15px 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(180deg, #660000, #220000);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+            transform: scale(1.05);
+            color: #fff;
+        }
+
+        /* === ВАЖНО: КЛАСС ДЛЯ ИКОНОК === */
+        .ui-icon {
+            width: 1.6em; 
+            height: 1.6em;
+            vertical-align: middle; 
+            display: inline-block;
+            margin: 0 4px; 
+            image-rendering: auto; 
+            filter: brightness(1.15) contrast(1.1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+        }
+
+        /* === СПЕЦ-СТИЛЬ ДЛЯ ВЕРХНИХ ПАНЕЛЕЙ (КАПСУЛ) === */
+        .resource-pill .res-item .ui-icon {
+            width: 2em; 
+            height: 2em;
+            filter: brightness(1.2) contrast(1.15) drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+        }
+
+        #ui-gold .ui-icon, #ui-crystal .ui-icon {
+            width: 2.2em; 
+            height: 2.2em;
+            filter: brightness(1.2) contrast(1.15) drop-shadow(0 0 6px rgba(255, 215, 0, 0.4));
+        }
+
+        /* === НОВЫЙ СТИЛЬ: ПАНЕЛЬ РЕСУРСОВ "КАПСУЛА" === */
+        .resource-bar-container {
+            padding: 10px;
+            background: #0d1117;
+            display: flex;
+            justify-content: center; 
+        }
+        
+        .resource-pill {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(90deg, #1c2a5e, #3a255d, #1c2a5e);
+            border: 2px solid #4a6fa5; 
+            border-radius: 25px; 
+            padding: 6px 30px; 
+            gap: 30px; 
+            box-shadow: inset 0 0 12px rgba(100, 150, 255, 0.4), 0 4px 8px rgba(0,0,0,0.8);
+            min-width: 60%; 
+        }
+
+        .res-item {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        /* === СПЕЦ-СТИЛЬ ДЛЯ СПИСКОВ МЕНЮ (КРОП И ЗУМ ИКОНОК) === */
+        .list-item .list-icon {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px;
+            border-radius: 50%;
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            box-shadow: 0 0 5px rgba(0, 179, 255, 0.4); 
+            background: #000; 
+        }
+
+        .list-item .list-icon .ui-icon,
+        .list-item .list-icon img {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            object-fit: cover; 
+            transform: scale(1.65); 
+            filter: brightness(1.2) contrast(1.2); 
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="music/prologue.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="menu-container">
+        <h1>История избавления</h1>
+        <button class="start-btn" onclick="startGame()">Начать игру</button>
+    </div>
+
+    <div id="story-container">
+        <button id="skip-btn" onclick="skipPrologue(event)">Пропустить</button>
+        <div id="left-panel"><img id="story-image" src="" alt="Сцена пролога"></div>
+        <div id="right-panel"><p id="story-text"></p><div id="continue-hint">Нажмите на экран, чтобы продолжить</div></div>
+    </div>
+
+    <div id="final-screen">
+        <h2 id="final-text" class="glowing-text">Здесь и началась ваша история</h2>
+    </div>
+
+    <div id="name-screen">
+        <h2>Как ваше имя, Избавитель?</h2>
+        <input type="text" id="player-name-input" placeholder="Иземберт" maxlength="15" autocomplete="off">
+        <button class="start-btn" style="padding: 10px 30px; font-size: 1.2rem; margin-top: 20px;" onclick="submitName()">Продолжить</button>
+    </div>
+
+    <div id="class-screen">
+        <h2 id="class-screen-title">Выберите свой путь</h2>
+        <div class="class-container">
+            <div class="class-card" onclick="selectClass(this, 'Целитель')">
+                <h3>🌿 Целитель</h3><p>Имеет большие характеристики регенерации, почти неубиваем, но бьет слабо.</p>
+            </div>
+            <div class="class-card" onclick="selectClass(this, 'Аннигилятор')">
+                <h3>🔥 Аннигилятор</h3><p>Мастер разрушения. Уничтожает всё на пути, но почти не регенерирует.</p>
+            </div>
+            <div class="class-card" onclick="selectClass(this, 'Искуситель')">
+                <h3>👁️ Искуситель</h3><p>Мастер контроля. Ослепляет, уклоняется, но слаб в открытом бою.</p>
+            </div>
+            <div class="class-card" onclick="selectClass(this, 'Защитник')">
+                <h3>🛡️ Защитник</h3><p>Создает мощные барьеры, но уязвим при их пробитии.</p>
+            </div>
+            <div class="class-card" onclick="selectClass(this, 'Друид')">
+                <h3>🐺 Друид</h3><p>Сражается вместе с духами-спутниками, которые принимают урон на себя.</p>
+            </div>
+        </div>
+        <button class="start-btn" id="confirm-class-btn" onclick="finishSetup()" style="opacity: 0.5; pointer-events: none; margin-top: 20px; font-size: 1.2rem; padding: 10px 30px;">Подтвердить</button>
+    </div>
+
+    <div id="game-hub">
+        <div class="hub-container">
+            
+            <div class="hub-header">
+                <div class="resource-bar-container">
+                    <div class="resource-pill">
+                        <div class="res-item" id="ui-gold">
+                            <img src="icons/gold.png" class="ui-icon" alt="Золото"> <span>100000</span>
+                        </div>
+                        <div class="res-item" id="ui-crystal">
+                            <img src="icons/diamond.png" class="ui-icon" alt="Алмазы"> <span>50000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="resource-bar-container" style="padding-top: 0;">
+                    <div class="resource-pill">
+                        <div class="res-item" id="stat-hp-top">
+                            <img src="icons/health.png" class="ui-icon" alt="Здоровье"> 500
+                        </div>
+                        <div class="res-item" id="stat-shield-top">
+                            <img src="icons/armor.png" class="ui-icon" alt="Броня"> 1
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scrollable-content">
+                
+                <div id="tab-main" class="tab-content active">
+                    <div class="cards-section" id="main-cards-section" style="display: flex;">
+                        </div>
+                    
+                    <div class="menu-list">
+                        <div class="list-item" onclick="openSubTab('tab-quests')">
+                            <div class="list-icon"><img src="icons/quests.png" class="ui-icon" alt="Задания"></div>
+                            <div class="list-text">Ежедневные задания</div>
+                            <div class="list-status"><div class="status-dot"></div></div>
+                        </div>
+
+                        <div class="list-item"><div class="list-icon"><div style="font-size:1.2rem;">🎲</div></div><div class="list-text">Ва-банк</div><div class="list-status">3д 10ч</div></div>
+                        
+                        <div class="list-item"><div class="list-icon"><div style="font-size:1.2rem;">🛣️</div></div><div class="list-text">Дороги</div><div class="list-status"><div class="status-dot"></div></div></div>
+                        
+                        <div class="list-item"><div class="list-icon"><div style="font-size:1.2rem;">🛡️</div></div><div class="list-text">Арена</div><div class="list-status"><div class="status-dot"></div></div></div>
+                        
+                        <div class="list-item" onclick="openSubTab('tab-shop')">
+                            <div class="list-icon">
+                                <img src="icons/shop_icon.png" class="icon-no-frame" alt="Магазин" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div style="display:none; font-size:1.2rem;">🛍️</div>
+                            </div>
+                            <div class="list-text" style="color:#d4af37; font-weight: bold;">Магазин</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-character" class="tab-content">
+                    <div class="char-header-block">
+                        <div class="char-avatar-frame" id="char-avatar-icon">🦹</div>
+                        <div class="char-title-block">
+                            <div class="char-name" id="profile-player-name">Иземберт</div>
+                            <div class="char-class" id="profile-player-class">Павший Избавитель</div>
+                            <div class="char-lvl">Уровень: <b id="char-lvl-val">1</b></div>
+                        </div>
+                    </div>
+                    <div class="char-stats-block">
+                        <div class="char-stat-row">Опыт: <span class="char-stat-val" id="char-xp-val">0 / 100</span> (<span id="char-xp-pct">0</span>%)</div>
+                        <div class="xp-bar-container"><div class="xp-bar-fill" id="char-xp-bar" style="width: 0%;"></div></div>
+                        
+                        <div class="char-stat-row" style="margin-top: 10px;" id="char-stat-shield">Щит: <span class="char-stat-val" id="char-shield-val">1</span> <span style="color:#aaa;" id="char-shield-base">(База: 1)</span></div>
+                        
+                        <div id="shield-skill-container" style="display:none; margin-top: 8px; background: rgba(0, 255, 204, 0.05); padding: 8px; border-radius: 4px; border: 1px solid #005566;">
+                            <div class="char-stat-row" style="margin-bottom: 4px; color: #00ffcc; font-size: 0.85rem;">Магия: Элементарный щит</div>
+                            <div style="font-size: 0.8rem; color: #88a3d6;" id="shield-skill-text">Усиление защиты: <b style="color:#00ffcc;">+0.00%</b></div>
+                        </div>
+
+                        <div class="char-stat-row" style="margin-top: 10px;">Арена: <span class="char-stat-val">0</span> <span style="color:#aaa;">(Без лиги)</span></div>
+                    </div>
+                    
+                    <div class="menu-list" style="margin-top: 10px;">
+                        <div class="list-item" onclick="openSubTab('tab-magic')">
+                            <div class="list-icon"><img src="icons/magic.png" class="ui-icon" alt="Магия"></div><div class="list-text">Магия</div><div class="list-status"><div class="status-dot"></div></div>
+                        </div>
+                        <div class="list-item" onclick="openSubTab('tab-inventory')">
+                            <div class="list-icon"><img src="icons/inventory.png" class="ui-icon" alt="Инвентарь"></div><div class="list-text">Инвентарь</div><div class="list-status" id="inv-count-badge" style="color:#fff;">(0)</div>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-icon"><img src="icons/equipment.png" class="ui-icon" alt="Снаряжение"></div><div class="list-text">Снаряжение</div><div class="list-status"></div>
+                        </div>
+                        <div class="list-item" onclick="openSubTab('tab-bank')">
+                            <div class="list-icon"><img src="icons/bank.png" class="ui-icon" alt="Копилка"></div><div class="list-text">Копилка</div><div class="list-status" style="color: #00ffff;" id="bank-count-badge"><img src="icons/diamond.png" class="ui-icon"> 0</div>
+                        </div>
+                        <div class="list-item">
+                            <div class="list-icon"><img src="icons/chest.png" class="ui-icon" alt="Сундук"></div><div class="list-text">Сундук</div><div class="list-status">(12)</div>
+                        </div>
+                        
+                        <div class="section-divider"></div>
+                        
+                        <div class="list-item" onclick="forceUnlockArena()" style="background: linear-gradient(180deg, #004400, #002200); border-color: #008800;">
+                            <div class="list-icon"><div style="font-size:1.2rem;">🔓</div></div>
+                            <div class="list-text" style="color: #00ff00; font-weight: bold;">Открыть Арену (Dev)</div>
+                        </div>
+
+                        <div class="list-item" onclick="forceUnlockRoads()" style="background: linear-gradient(180deg, #440044, #220022); border-color: #880088;">
+                            <div class="list-icon"><div style="font-size:1.2rem;">🛣️</div></div>
+                            <div class="list-text" style="color: #ff00ff; font-weight: bold;">Открыть Дороги (Dev)</div>
+                        </div>
+
+                        <div class="list-item" onclick="showChangeClassMenu()" style="background: linear-gradient(180deg, #15203b, #090d1a); border-color: #29385c;">
+                            <div class="list-icon"><div style="font-size:1.2rem;">🔄</div></div>
+                            <div class="list-text" style="color: #00b3ff; font-weight: bold;">Сменить класс (Тест)</div>
+                        </div>
+
+                        <div class="list-item" onclick="resetProgress()" style="background: linear-gradient(180deg, #660000, #330000); border-color: #aa0000;">
+                            <div class="list-icon"><div style="font-size:1.2rem;">☠️</div></div>
+                            <div class="list-text" style="color: #ffcccc; font-weight: bold;">Сбросить прогресс</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-domain" class="tab-content">
+                    <div class="shop-header">Деревня</div>
+                    
+                    <div id="domain-locked" style="padding: 40px; text-align: center; color: #88a3d6;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">🏰</div>
+                        <h2>Ваш Домен</h2>
+                        <p>Доступ к управлению деревней закрыт.<br>Продолжайте свой Путь волшебника.</p>
+                    </div>
+
+                    <div id="domain-unlocked" style="display:none; text-align: center; padding-top: 20px;">
+                        <div style="height: 200px; display: flex; justify-content: center; align-items: flex-end; margin-bottom: 10px;">
+                            <img src="icons/fullelder.png" style="max-height: 100%; object-fit: contain;" alt="Староста" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none; font-size: 6rem;">🧍‍♂️</div>
+                        </div>
+                        <div style="color: #ccc; font-size: 0.9rem; font-family: 'Georgia', serif; margin-bottom: 20px; font-style: italic;">«Ждем ваших указаний, господин Избавитель.»</div>
+                        
+                        <div class="menu-list" style="text-align: left;">
+                            <div class="list-item" onclick="enterTownHall()">
+                                <div class="list-icon"><div style="font-size:1.2rem;">🏛️</div></div>
+                                <div class="list-text">Ратуша</div>
+                                <div class="list-status"><div class="status-dot"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-quests" class="tab-content">
+                    <div class="sub-header">Ежедневные задания</div>
+                    <div class="back-btn" onclick="switchTab('main', document.getElementById('nav-btn-main'))">🔙 На Главную</div>
+                    <div id="quest-list"></div>
+                </div>
+
+                <div id="tab-bank" class="tab-content">
+                    <div class="sub-header">Копилка</div>
+                    <div class="back-btn" onclick="switchTab('character', document.getElementById('nav-btn-character'))">🔙 К персонажу</div>
+                    
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="margin-bottom: 20px;">
+                            <img src="icons/bank_dragon_art.png" alt="Дракон-копилка" style="width: 120px; height: 120px; object-fit: contain; display: block; margin: 0 auto; filter: drop-shadow(0 0 15px rgba(0, 179, 255, 0.4));">
+                        </div>
+                        
+                        <div style="color: #e0f7fa; margin-bottom: 10px; font-size: 1.1rem;">В копилке: <b id="bank-balance" style="color: #00ffff;"><img src="icons/diamond.png" class="ui-icon"> 0</b></div>
+                        <div style="color: #88a3d6; font-size: 0.9rem; margin-bottom: 20px;">На руках: <span id="bank-hand"><img src="icons/diamond.png" class="ui-icon"> 0</span></div>
+                        
+                        <input type="number" id="bank-input" class="bank-input" placeholder="Сумма" min="1">
+                        
+                        <div style="display: flex; justify-content: center; gap: 10px;">
+                            <button class="btn-quest active" style="width: 45%; background: linear-gradient(180deg, #005566, #002b33); border-color: #0088aa; font-size: 1rem; padding: 10px;" onclick="depositBank()">Пополнить</button>
+                            <button class="btn-quest active" style="width: 45%; background: linear-gradient(180deg, #660066, #330033); border-color: #aa00aa; font-size: 1rem; padding: 10px;" onclick="withdrawBank()">Забрать</button>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <a href="#" onclick="openSubTab('tab-bank-info')" style="color: #88a3d6; font-size: 0.85rem; text-decoration: underline;">Подробнее о копилке</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-bank-info" class="tab-content">
+                    <div class="sub-header">О копилке</div>
+                    <div class="back-btn" onclick="openSubTab('tab-bank')">🔙 Назад в Копилку</div>
+                    
+                    <div style="padding: 15px; color: #e0f7fa; font-size: 0.9rem; line-height: 1.5;">
+                        <p><b>Копилка</b> доступна с <b>30 уровня</b> персонажа (или раньше, если будут получены алмазы в копилку на более низком уровне).</p>
+                        <p>Она даёт возможность собирать электрум для:</p>
+                        <ul style="padding-left: 20px; color: #88a3d6;">
+                            <li>повышения уровней навыков магии</li>
+                            <li>обучения новому качеству алхимии</li>
+                            <li>расширения домена</li>
+                            <li>получения возможности сохранения дополнительных наборов снаряжения и талантов</li>
+                        </ul>
+                        <p>Внесённый в неё электрум можно будет потратить на следующее такое повышение, обучение или получение возможности сохранения дополнительных наборов. Электрум из копилки можно также потратить на приобретение личного аватара, личного смайла, личного подарка или образа снаряжения.</p>
+                        <p style="color: #ff4d4d; font-weight: bold; text-align: center; margin-top: 15px;">Алмазы из копилки забрать нельзя!</p>
+                    </div>
+                </div>
+
+                <div id="tab-shop" class="tab-content">
+                    <div class="shop-header">Магазин редкостей</div>
+                    <div class="back-btn" onclick="switchTab('main', document.getElementById('nav-btn-main'))">🔙 Вернуться на Главную</div>
+                    
+                    <div style="text-align: center; color: #00ffcc; font-size: 0.8rem; margin: 10px 0;">Испытай удачу - получи вещь высокого уровня!</div>
+
+                    <div class="shop-item-card">
+                        <div class="shop-item-icon-wrapper">
+                            <img src="icons/shop_equip.png" class="icon-no-frame" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none;">🛡️</div>
+                        </div>
+                        <div class="shop-item-details">
+                            <div class="shop-item-title">🔮 Случайное снаряжение, 1 ур</div>
+                            <div class="shop-item-desc">шляпа, мантия, посох, сапоги, кольцо или амулет</div>
+                            <button class="shop-buy-btn" onclick="buyItem('equip')">Купить за 100 <img src="icons/gold.png" class="ui-icon"></button>
+                            <div class="shop-item-chance">Высокий шанс получить снаряжение для Защитника</div>
+                        </div>
+                    </div>
+
+                    <div class="shop-item-card">
+                        <div class="shop-item-icon-wrapper">
+                            <img src="icons/shop_skill.png" class="icon-no-frame" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none;">📖</div>
+                        </div>
+                        <div class="shop-item-details">
+                            <div class="shop-item-title">🔮 Случайная книга, 1 ур</div>
+                            <div class="shop-item-desc">книга защиты, увеличивает мощь барьера</div>
+                            <button class="shop-buy-btn" onclick="buyItem('skill')">Купить за 100 <img src="icons/gold.png" class="ui-icon"></button>
+                            <div class="shop-item-chance">Увеличивает множитель физи защиты</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-inventory" class="tab-content">
+                    <div class="sub-header">Ваш Инвентарь</div>
+                    <div class="back-btn" onclick="switchTab('character', document.getElementById('nav-btn-character'))">🔙 К персонажу</div>
+                    <div class="inv-section-title"><img src="icons/equipment.png" class="ui-icon"> Надето на вас</div><div id="inv-equipped-list" style="padding: 10px 15px; background: #0a0e1c;"></div>
+                    <div class="inv-section-title"><img src="icons/inventory.png" class="ui-icon"> Экипировка в рюкзаке</div><div id="inv-equip-list" style="padding: 0 0 10px 0;"></div>
+                    <div class="inv-section-title">📚 Книги и свитки</div><div id="inv-skill-list" style="padding: 0 0 10px 0;"></div>
+                </div>
+
+                <div id="tab-magic" class="tab-content">
+                    <div class="sub-header">Книга Заклинаний</div>
+                    <div class="back-btn" onclick="switchTab('character', document.getElementById('nav-btn-character'))">🔙 К персонажу</div>
+                    <div id="magic-list" style="padding: 0 0 10px 0;"></div>
+                </div>
+
+                <div id="tab-battle" class="tab-content" style="background: #0f121b;">
+                    <div class="shop-header" style="background: linear-gradient(180deg, #151021, #0a0e1c); border-bottom: 2px solid #3f3b63; color: #fff;">Поединок</div>
+                    
+                    <div style="background: linear-gradient(90deg, #3a0000, #110000); border: 1px solid #8b0000; padding: 10px; margin: 10px; border-radius: 6px; display: flex; align-items: center;">
+                        <div id="battle-enemy-icon-container" style="width: 50px; height: 50px; background: #000; border: 2px solid #ff4d4d; border-radius: 4px; display: flex; justify-content: center; align-items: center; overflow: hidden; font-size: 2rem;">
+                            </div>
+                        <div style="flex-grow: 1; margin-left: 10px;">
+                            <div style="display: flex; justify-content: space-between; color: #fff; font-weight: bold; margin-bottom: 5px;">
+                                <span id="battle-enemy-name" style="color:#ffcccc;">Маг-бандит</span>
+                                <span id="enemy-hp-text"><img src="icons/health.png" class="ui-icon"> 200</span>
+                            </div>
+                            <div id="crit-warning" style="display:none; color:#ff0000; font-weight:bold; text-align:center; animation: fastBlink 0.5s infinite; font-size: 0.8rem; margin-bottom: 2px; text-shadow: 0 0 5px #ff0000;">
+                                ⚠️ ВНИМАНИЕ! КРИТИЧЕСКАЯ АТАКА! ⚠️
+                            </div>
+                            <div style="width: 100%; background: #000; height: 8px; border-radius: 4px; border: 1px solid #333; overflow: hidden;">
+                                <div id="enemy-hp-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #cc0000, #ff4d4d); transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="battle-spells-container" style="display: flex; justify-content: space-around; margin: 15px 10px; flex-wrap: wrap; gap: 10px;">
+                        </div>
+
+                    <div style="margin: 5px 15px 15px 15px;">
+                        <div style="color: #00b3ff; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; text-align: center;">МАНА: <span id="mana-text" style="color:#fff;">0%</span></div>
+                        <div style="width: 100%; background: #000; height: 14px; border-radius: 7px; border: 1px solid #005566; overflow: hidden; box-shadow: 0 0 10px rgba(0,179,255,0.3);">
+                            <div id="mana-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0055ff, #00ffff); transition: width 0.1s linear;"></div>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(90deg, #111a33, #0a0e1c); border: 1px solid #485c8a; padding: 10px; margin: 10px; border-radius: 6px; display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; background: #000; border: 2px solid #00b3ff; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 2rem;" id="battle-player-icon">🦹</div>
+                        <div style="flex-grow: 1; margin-left: 10px;">
+                            <div style="display: flex; justify-content: space-between; color: #fff; font-weight: bold; margin-bottom: 5px; align-items: center;">
+                                <span id="battle-player-name" style="color:#e0f7fa;">Иземберт</span>
+                                <div>
+                                    <span id="battle-shield-timer" style="display:none; color:#00ffcc; font-size:0.85rem; margin-right:8px; text-shadow: 0 0 5px #00ffcc;"><img src="icons/armor.png" class="ui-icon"> 8.0с</span>
+                                    <span id="player-hp-text"><img src="icons/health.png" class="ui-icon"> 500</span>
+                                </div>
+                            </div>
+                            <div style="width: 100%; background: #000; height: 8px; border-radius: 4px; border: 1px solid #333; overflow: hidden;">
+                                <div id="player-hp-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #009900, #00ffcc); transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin: 10px; flex-grow: 1; display: flex; flex-direction: column;">
+                        <div style="background: #050814; border: 1px solid #29385c; border-radius: 6px; padding: 10px; height: 180px; overflow-y: auto; font-size: 0.85rem; color: #b0b0b0;" id="battle-log">
+                            <div style="color: #e0f7fa; margin-bottom: 5px;">⚔️ Бой начался! Используйте заклинания для атаки.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dialogue-screen">
+                    <div class="dialogue-portrait" id="dlg-portrait"></div>
+                    <div class="dialogue-box">
+                        <div class="dialogue-speaker" id="dlg-speaker">Маг-бандит</div>
+                        <div class="dialogue-text" id="dlg-text">Текст диалога...</div>
+                        <div class="dialogue-options" id="dlg-options"></div>
+                    </div>
+                </div>
+
+                <div id="loot-alert" class="custom-alert">
+                    <div id="loot-alert-text">Вы получили предмет!</div>
+                    <div id="loot-alert-btns" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="closeLootAlert()">Отлично</button>
+                    </div>
+                </div>
+
+            </div> 
+
+            <div id="black-screen-ending">
+                <p>Что я наделал...<br><br>Может, так было правильно?</p>
+            </div>
+
+            <div class="bottom-nav">
+                <div class="nav-item active" id="nav-btn-main" onclick="switchTab('main', this)">
+                    <div class="nav-icon"><img src="icons/main.png" alt="Главная" onerror="this.style.display='none'"></div><div class="nav-text">Главная</div>
+                </div>
+                <div class="nav-item" id="nav-btn-character" onclick="switchTab('character', this)">
+                    <div class="nav-icon"><img src="icons/pers.png" alt="Персонаж" class="icon-pers" onerror="this.style.display='none'"></div><div class="nav-text">Персонаж</div>
+                </div>
+                <div class="nav-item" id="nav-btn-domain" onclick="switchTab('domain', this)">
+                    <div class="nav-icon"><img src="icons/domen.png" alt="Домен" onerror="this.style.display='none'"></div><div class="nav-text">Домен</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function forceUnlockArena() {
+            arenaUnlocked = true;
+            arenaGhostIntroDone = true;
+            etherealFlowers = 5;
+            if(typeof saveGame === 'function') saveGame();
+            if(typeof updateMainCards === 'function') updateMainCards();
+            if(typeof showLootAlert === 'function') {
+                showLootAlert('🛡️ <b>АРЕНА РАЗБЛОКИРОВАНА (DEV)!</b><br><br>Теперь вы можете переключаться на вкладку Главная и использовать Арену Призраков!');
+            }
+        }
+
+        function forceUnlockRoads() {
+            if (typeof currentEliteBossIndex !== 'undefined' && currentEliteBossIndex < 6) currentEliteBossIndex = 6; 
+            roadsUnlocked = true;
+            roadsIntroDone = true;
+            if(typeof saveGame === 'function') saveGame();
+            if(typeof updateMainCards === 'function') updateMainCards();
+            if(typeof showLootAlert === 'function') {
+                showLootAlert('🛣️ <b>ДОРОГИ РАЗБЛОКИРОВАНЫ (DEV)!</b><br><br>Теперь вы можете переключаться на вкладку Главная и исследовать Неизведанные Дороги!');
+            }
+        }
+    </script>
+
+    <script src="https://yandex.ru/games/sdk/v2"></script>
+
+    <script src="js/data.js"></script>
+    <script src="js/state.js"></script>
+    
+    <script src="js/ui/ui_core.js"></script>
+    <script src="js/ui/domain.js"></script>
+    <script src="js/ui/inventory.js"></script>
+    <script src="js/ui/shop.js"></script>
+    <script src="js/ui/arena.js"></script>
+
+    <script src="js/gameplay/story.js"></script>
+    <script src="js/gameplay/quests.js"></script>
+    <script src="js/gameplay/exploration.js"></script>
+
+    <script src="js/combat/magic.js"></script>
+    <script src="js/combat/combat_core.js"></script>
+    
+    <script src="js/main.js"></script>
+
+</body>
+</html>
